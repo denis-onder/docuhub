@@ -12,7 +12,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"strings"
 
 	"github.com/PuerkitoBio/goquery"
 )
@@ -42,11 +41,12 @@ var channels []Channel = []Channel{
 	{name: "Timeline - World History Documentaries", url: "http://www.youtube.com/channel/UC88lvyJe7aHZmcvzvubDFRg/videos"},
 }
 
-func scrapeVideos(channel Channel, c chan string, w http.ResponseWriter) {
+func scrapeVideos(channel Channel) ([]Video, error) {
+	output := []Video{}
 	// Request the HTML page.
 	res, err := http.Get(channel.url)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 	defer res.Body.Close()
 	if res.StatusCode != 200 {
@@ -56,30 +56,23 @@ func scrapeVideos(channel Channel, c chan string, w http.ResponseWriter) {
 	// Load the HTML document
 	doc, err := goquery.NewDocumentFromReader(res.Body)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
-	// Find the review items
-	sel := doc.Find("a").Each(func(i int, s *goquery.Selection) {
-		href, exists := s.Attr("href")
-		if exists && strings.Contains(href, "/watch") {
-			c <- href
-		}
-		// for i := 0; i < len(s.Nodes); i++ {
-		// 	fmt.Fprintf(w, <-c+"\n")
-		// }
+	doc.Find(".ytd-grid-video-renderer").Each(func(i int, s *goquery.Selection) {
+		output = append(output, Video{thumbnail: "test", title: "test", uploadDate: "test", url: "test", views: 123})
 	})
-
-	fmt.Println(len(sel.Nodes))
+	return output, nil
 }
 
 // GetDocumentaries gets all docs from the listed channels
 func GetDocumentaries(w http.ResponseWriter, r *http.Request) {
-	c := make(chan string)
-	for _, channel := range channels {
-		go scrapeVideos(channel, c, w)
+	// for _, channel := range channels {
+	channel := channels[0]
+	videos, err := scrapeVideos(channel)
+	if err != nil {
+		log.Fatal(err)
 	}
-	for {
-		fmt.Fprintf(w, "<p>%s</p>\n", <-c)
-	}
+	fmt.Fprintf(w, "%s -> %d\n", channel.name, len(videos))
+	// }
 }
