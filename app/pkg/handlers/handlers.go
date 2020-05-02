@@ -22,7 +22,8 @@ type Video struct {
 	thumbnail  string
 	uploadDate string
 	url        string
-	views      int
+	length     string
+	views      string
 }
 
 // Channel - Struct used to define a YouTube channel
@@ -42,13 +43,15 @@ var channels []Channel = []Channel{
 }
 
 func scrapeVideos(channel Channel) ([]Video, error) {
-	output := []Video{}
+	var output []Video // Output
+
 	// Request the HTML page.
 	res, err := http.Get(channel.url)
 	if err != nil {
 		return nil, err
 	}
 	defer res.Body.Close()
+
 	if res.StatusCode != 200 {
 		log.Fatalf("status code error: %d %s", res.StatusCode, res.Status)
 	}
@@ -59,20 +62,45 @@ func scrapeVideos(channel Channel) ([]Video, error) {
 		return nil, err
 	}
 
-	doc.Find(".ytd-grid-video-renderer").Each(func(i int, s *goquery.Selection) {
-		output = append(output, Video{thumbnail: "test", title: "test", uploadDate: "test", url: "test", views: 123})
+	doc.Find(".yt-lockup-dismissable").Each(func(i int, s *goquery.Selection) {
+		// Thumbnail
+		thumbnail, _ := s.Find("img").Attr("src")
+		// Title
+		titleAndURLAnchor := s.Find("a.yt-uix-sessionlink")
+		title := titleAndURLAnchor.Text()
+		// URL
+		param, _ := titleAndURLAnchor.Attr("href")
+		url := "https://youtube.com" + param
+		// Upload date
+		uploadDateAndViewsList := s.Find("ul.yt-lockup-meta-info").Children()
+		uploadDate := uploadDateAndViewsList.First()
+		// Views
+		views := uploadDate.Next().Text()
+		// Length
+		length := s.Find("span.accessible-description").Text()
+		output = append(output, Video{
+			thumbnail:  thumbnail,
+			title:      title,
+			url:        url,
+			uploadDate: uploadDate.Text(),
+			views:      views,
+			length:     length})
 	})
+
 	return output, nil
 }
 
 // GetDocumentaries gets all docs from the listed channels
 func GetDocumentaries(w http.ResponseWriter, r *http.Request) {
-	// for _, channel := range channels {
-	channel := channels[0]
-	videos, err := scrapeVideos(channel)
-	if err != nil {
-		log.Fatal(err)
+	for _, channel := range channels {
+		videos, err := scrapeVideos(channel)
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Fprintf(w, "<p>%s -> %d</p>", channel.name, len(videos))
+		for i, video := range videos {
+			fmt.Fprintf(w, "<p>%d. %s</p>", i, video.title)
+		}
+		fmt.Fprintf(w, "\n")
 	}
-	fmt.Fprintf(w, "%s -> %d\n", channel.name, len(videos))
-	// }
 }
