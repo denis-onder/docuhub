@@ -9,6 +9,7 @@ package handlers
 */
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -32,6 +33,12 @@ type Channel struct {
 	url  string
 }
 
+// Response - Concurrency channel return type
+type Response struct {
+	videos []Video
+	err    error
+}
+
 var channels []Channel = []Channel{
 	{name: "National Geographic", url: "http://www.youtube.com/user/NationalGeographic/videos"},
 	{name: "Journeyman Pictures", url: "http://www.youtube.com/user/journeymanpictures/videos"},
@@ -42,24 +49,24 @@ var channels []Channel = []Channel{
 	{name: "Timeline - World History Documentaries", url: "http://www.youtube.com/channel/UC88lvyJe7aHZmcvzvubDFRg/videos"},
 }
 
-func scrapeVideos(channel Channel) ([]Video, error) {
+func scrapeVideos(channel Channel, c chan Response) {
 	var output []Video // Output
 
 	// Request the HTML page.
 	res, err := http.Get(channel.url)
 	if err != nil {
-		return nil, err
+		c <- Response{videos: nil, err: err}
 	}
 	defer res.Body.Close()
 
 	if res.StatusCode != 200 {
-		log.Fatalf("status code error: %d %s", res.StatusCode, res.Status)
+		c <- Response{videos: nil, err: errors.New("source not available")}
 	}
 
 	// Load the HTML document
 	doc, err := goquery.NewDocumentFromReader(res.Body)
 	if err != nil {
-		return nil, err
+		c <- Response{videos: nil, err: err}
 	}
 
 	doc.Find(".yt-lockup-dismissable").Each(func(i int, s *goquery.Selection) {
@@ -78,6 +85,8 @@ func scrapeVideos(channel Channel) ([]Video, error) {
 		views := uploadDate.Next().Text()
 		// Length
 		length := s.Find("span.accessible-description").Text()
+
+		// Form output
 		output = append(output, Video{
 			thumbnail:  thumbnail,
 			title:      title,
@@ -87,20 +96,24 @@ func scrapeVideos(channel Channel) ([]Video, error) {
 			length:     length})
 	})
 
-	return output, nil
+	c <- Response{videos: output, err: nil}
 }
 
 // GetDocumentaries gets all docs from the listed channels
 func GetDocumentaries(w http.ResponseWriter, r *http.Request) {
+	c := make(chan Response)
+
 	for _, channel := range channels {
-		videos, err := scrapeVideos(channel)
-		if err != nil {
-			log.Fatal(err)
+		go scrapeVideos(channel, c)
+	}
+
+	for i := 0; i < len(channels); i++ {
+		res := <-c
+		if res.err != nil {
+			log.Fatal(res.err)
 		}
-		fmt.Fprintf(w, "<p>%s -> %d</p>", channel.name, len(videos))
-		for i, video := range videos {
+		for i, video := range res.videos {
 			fmt.Fprintf(w, "<p>%d. %s</p>", i, video.title)
 		}
-		fmt.Fprintf(w, "\n")
 	}
 }
