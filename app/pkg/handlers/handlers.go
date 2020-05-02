@@ -9,22 +9,23 @@ package handlers
 */
 
 import (
+	"encoding/json"
 	"errors"
-	"fmt"
-	"log"
 	"net/http"
+	"strings"
 
 	"github.com/PuerkitoBio/goquery"
 )
 
 // Video - Struct used to define a video
 type Video struct {
-	title      string
-	thumbnail  string
-	uploadDate string
-	url        string
-	length     string
-	views      string
+	Title      string `json:"Title"`
+	Thumbnail  string `json:"Thumbnail"`
+	UploadDate string `json:"UploadDate"`
+	URL        string `json:"URL"`
+	Length     string `json:"Length"`
+	Views      string `json:"Views"`
+	Author     string `json:"Author"`
 }
 
 // Channel - Struct used to define a YouTube channel
@@ -74,26 +75,28 @@ func scrapeVideos(channel Channel, c chan Response) {
 		thumbnail, _ := s.Find("img").Attr("src")
 		// Title
 		titleAndURLAnchor := s.Find("a.yt-uix-sessionlink")
-		title := titleAndURLAnchor.Text()
+		titleText := strings.ReplaceAll(titleAndURLAnchor.Text(), "\n", "")
+		title := strings.Trim(titleText, " ")
 		// URL
 		param, _ := titleAndURLAnchor.Attr("href")
 		url := "https://youtube.com" + param
 		// Upload date
 		uploadDateAndViewsList := s.Find("ul.yt-lockup-meta-info").Children()
-		uploadDate := uploadDateAndViewsList.First()
+		views := uploadDateAndViewsList.First()
 		// Views
-		views := uploadDate.Next().Text()
+		uploadDate := views.Next().Text()
 		// Length
 		length := s.Find("span.accessible-description").Text()
 
 		// Form output
 		output = append(output, Video{
-			thumbnail:  thumbnail,
-			title:      title,
-			url:        url,
-			uploadDate: uploadDate.Text(),
-			views:      views,
-			length:     length})
+			Thumbnail:  thumbnail,
+			Title:      title,
+			URL:        url,
+			UploadDate: uploadDate,
+			Views:      views.Text(),
+			Length:     strings.Replace(length, " - ", "", 1),
+			Author:     channel.name})
 	})
 
 	c <- Response{videos: output, err: nil}
@@ -102,6 +105,9 @@ func scrapeVideos(channel Channel, c chan Response) {
 // GetDocumentaries gets all docs from the listed channels
 func GetDocumentaries(w http.ResponseWriter, r *http.Request) {
 	c := make(chan Response)
+	defer close(c)
+
+	videos := []Video{}
 
 	for _, channel := range channels {
 		go scrapeVideos(channel, c)
@@ -110,10 +116,13 @@ func GetDocumentaries(w http.ResponseWriter, r *http.Request) {
 	for i := 0; i < len(channels); i++ {
 		res := <-c
 		if res.err != nil {
-			log.Fatal(res.err)
+			json.NewEncoder(w).Encode(res.err)
+			return
 		}
-		for i, video := range res.videos {
-			fmt.Fprintf(w, "<p>%d. %s</p>", i, video.title)
+		for _, video := range res.videos {
+			videos = append(videos, video)
 		}
 	}
+
+	json.NewEncoder(w).Encode(videos)
 }

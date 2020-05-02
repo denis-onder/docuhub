@@ -16,3 +16,6 @@
 
 # Sample DOM outputs from the scraper
 test*
+
+# Compiled CSS
+client/css
