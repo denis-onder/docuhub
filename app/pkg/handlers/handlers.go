@@ -11,8 +11,10 @@ package handlers
 import (
 	"encoding/json"
 	"errors"
+	"math/rand"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/PuerkitoBio/goquery"
 )
@@ -48,6 +50,17 @@ var channels []Channel = []Channel{
 	{name: "Free Documentary", url: "http://www.youtube.com/user/FreeDocumentary/videos"},
 	{name: "Documentary Tube", url: "http://www.youtube.com/user/TheDocumenteriesTube/videos"},
 	{name: "Timeline - World History Documentaries", url: "http://www.youtube.com/channel/UC88lvyJe7aHZmcvzvubDFRg/videos"},
+}
+
+func shuffle(videos []Video) {
+	// Create a truly random RNG
+	src := rand.NewSource(time.Now().UnixNano())
+	r := rand.New(src)
+	// Swap indices
+	for i := range videos {
+		newPos := r.Intn(len(videos) - 1)
+		videos[i], videos[newPos] = videos[newPos], videos[i] // Swap syntax
+	}
 }
 
 func enableCors(w *http.ResponseWriter) {
@@ -130,6 +143,8 @@ func GetDocumentaries(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 	}
+
+	shuffle(videos)
 
 	json.NewEncoder(w).Encode(videos)
 }
