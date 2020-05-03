@@ -15,23 +15,28 @@ body {
 
 .search_wrapper {
   width: 100%;
-  text-align: center;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
 }
 
-.search {
+.counter {
+  width: 100%;
+  text-align: center;
+  font-weight: bold;
+}
+
+.search,
+.search_btn {
   background-color: #fff;
-  border: none;
-  outline: none;
-  -webkit-box-shadow: 0px 0px 10px 0px rgb(151, 151, 151);
-  -moz-box-shadow: 0px 0px 10px 0px rgba(151, 151, 151);
-  box-shadow: 0px 0px 10px 0px rgba(151, 151, 151);
-  border-radius: 5px;
   padding: 0.75em 5em;
   text-align: center;
   font-weight: bold;
   font-family: "Montserrat";
   font-size: 16px;
   margin-bottom: 20px;
+  margin-right: 5px;
+  margin-left: 5px;
 }
 
 .search::placeholder {
@@ -42,6 +47,18 @@ body {
 
 .search:focus::placeholder {
   color: transparent;
+}
+
+.search_btn {
+  background-color: rgb(19, 185, 19);
+  transition: background-color ease-in-out 0.1s;
+  color: #fff;
+  cursor: pointer;
+  padding: 0.75em 1em;
+}
+
+.search_btn:hover {
+  background-color: rgb(18, 173, 18);
 }
 
 .grid {
@@ -55,10 +72,6 @@ body {
   background-color: #ffffff;
   width: 250px;
   margin: 20px auto;
-  -webkit-box-shadow: 0px 0px 10px 0px rgb(151, 151, 151);
-  -moz-box-shadow: 0px 0px 10px 0px rgba(151, 151, 151);
-  box-shadow: 0px 0px 10px 0px rgba(151, 151, 151);
-  border-radius: 5px;
 }
 
 .video_thumbnail {
@@ -94,4 +107,13 @@ body {
   .search {
     padding: 0.5em 2em;
   }
+}
+
+.shadow {
+  border: none;
+  outline: none;
+  -webkit-box-shadow: 0px 0px 10px 0px rgb(151, 151, 151);
+  -moz-box-shadow: 0px 0px 10px 0px rgba(151, 151, 151);
+  box-shadow: 0px 0px 10px 0px rgba(151, 151, 151);
+  border-radius: 5px;
 }

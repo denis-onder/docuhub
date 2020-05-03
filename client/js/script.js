@@ -1,33 +1,57 @@
 const BASE_URL = "http://localhost:9000",
   grid = document.getElementById("grid"),
-  counter = document.getElementById("counter");
+  counter = document.getElementById("counter"),
+  searchInput = document.getElementById("search"),
+  searchBtn = document.getElementById("search_btn");
+
+let videos = [];
 
 const url = (endpoint) => BASE_URL + endpoint;
 
-async function getDocumentaries() {
-  const res = await fetch(url("/all")),
-    data = await res.json();
-
-  counter.innerText = `${data.length} videos available`;
-
-  data.forEach(
-    (v) =>
-      (grid.innerHTML += `
-      <div class="video">
-        <a href="${v.URL}" class="video_link"
+function renderVideos(video) {
+  grid.innerHTML += `
+      <div class="video shadow">
+        <a href="${video.URL}" class="video_link"
         ><img
-        src="${v.Thumbnail}"
-        srcset="${v.Thumbnail}"
+        src="${video.Thumbnail}"
+        srcset="${video.Thumbnail}"
         alt="thumbnail"
         class="video_thumbnail"
         /></a>
-        <p class="video_text">${v.Title}</p>
-        <p class="video_text">${v.Author}</p>
-        <p class="video_text">${v.UploadDate}</p>
-        <p class="video_text">${v.Length}</p>
-        <p class="video_text">${v.Views}</p>
-      </div>`)
-  );
+        <p class="video_text">${video.Title}</p>
+        <p class="video_text">${video.Author}</p>
+        <p class="video_text">${video.UploadDate}</p>
+        <p class="video_text">${video.Length}</p>
+        <p class="video_text">${video.Views}</p>
+      </div>`;
 }
 
+function clearAndRenderVideos(vids) {
+  counter.innerText = `${vids.length} videos available`;
+
+  grid.innerHTML = "";
+
+  vids.forEach(renderVideos);
+}
+
+function handleSearch({ target, keyCode }) {
+  if (target.tagName === "INPUT" && keyCode !== 13) return;
+  const searchTerm =
+    target.tagName === "INPUT" ? target.value : searchInput.value;
+  const filteredVideos = videos.filter((v) =>
+    v.Title.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  clearAndRenderVideos(filteredVideos);
+}
+
+async function getDocumentaries() {
+  const res = await fetch(url("/all"));
+  videos = await res.json();
+
+  clearAndRenderVideos(videos);
+}
+
+searchInput.onkeydown = handleSearch;
+searchBtn.onclick = handleSearch;
 window.onload = getDocumentaries;
