@@ -1,5 +1,6 @@
 const BASE_URL = "http://localhost:9000",
-  output = document.getElementById("grid");
+  grid = document.getElementById("grid"),
+  counter = document.getElementById("counter");
 
 const url = (endpoint) => BASE_URL + endpoint;
 
@@ -7,9 +8,11 @@ async function getDocumentaries() {
   const res = await fetch(url("/all")),
     data = await res.json();
 
+  counter.innerText = `${data.length} videos available`;
+
   data.forEach(
     (v) =>
-      (output.innerHTML += `
+      (grid.innerHTML += `
       <div class="video">
         <a href="${v.URL}" class="video_link"
         ><img

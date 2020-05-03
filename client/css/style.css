@@ -45,7 +45,7 @@ body {
 }
 
 .grid {
-  width: 60%;
+  width: 50%;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   margin: 10px auto;
@@ -53,7 +53,7 @@ body {
 
 .video {
   background-color: #ffffff;
-  width: 300px;
+  width: 250px;
   margin: 20px auto;
   -webkit-box-shadow: 0px 0px 10px 0px rgb(151, 151, 151);
   -moz-box-shadow: 0px 0px 10px 0px rgba(151, 151, 151);
@@ -70,4 +70,28 @@ body {
 .video_text {
   margin-left: 10px;
   margin-right: 10px;
+}
+
+@media (max-width: 1556px) {
+  .grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 1036px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 526px) {
+  .grid {
+    width: 100%;
+  }
+  .title {
+    font-size: 46px;
+  }
+  .search {
+    padding: 0.5em 2em;
+  }
 }
