@@ -12,7 +12,7 @@ import (
 // Router
 func createRouter() *mux.Router {
 	router := mux.NewRouter().StrictSlash(true)
-	router.HandleFunc("/test", handlers.GetDocumentaries)
+	router.HandleFunc("/all", handlers.GetDocumentaries)
 
 	return router
 }
@@ -20,11 +20,6 @@ func createRouter() *mux.Router {
 // Start the web server
 func Start(port int) {
 	router := createRouter()
-
-	// Static files
-	staticDir := http.Dir("../../static")
-	fs := http.FileServer(staticDir)
-	http.Handle("/static/", http.StripPrefix("/static", fs))
 
 	// Server init
 	p := ":" + strconv.Itoa(port)

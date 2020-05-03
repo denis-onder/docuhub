@@ -3,11 +3,16 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="./css/style.css" />
     <title>docuhub</title>
   </head>
+
   <body>
-    {{range .Videos}}
-    <p>test</p>
-    {{end}}
+    <h1 class="title">docuhub</h1>
+    <div class="search_wrapper">
+      <input type="text" class="search" placeholder="search term" />
+    </div>
+    <div id="grid" class="grid"></div>
+    <script src="./js/script.js"></script>
   </body>
 </html>

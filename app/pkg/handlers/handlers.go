@@ -50,6 +50,12 @@ var channels []Channel = []Channel{
 	{name: "Timeline - World History Documentaries", url: "http://www.youtube.com/channel/UC88lvyJe7aHZmcvzvubDFRg/videos"},
 }
 
+func enableCors(w *http.ResponseWriter) {
+	(*w).Header().Set("Access-Control-Allow-Origin", "*")
+	(*w).Header().Set("Access-Control-Allow-Methods", "GET")
+	(*w).Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+}
+
 func scrapeVideos(channel Channel, c chan Response) {
 	var output []Video // Output
 
@@ -104,6 +110,7 @@ func scrapeVideos(channel Channel, c chan Response) {
 
 // GetDocumentaries gets all docs from the listed channels
 func GetDocumentaries(w http.ResponseWriter, r *http.Request) {
+	enableCors(&w)
 	c := make(chan Response)
 	defer close(c)
 
@@ -117,10 +124,10 @@ func GetDocumentaries(w http.ResponseWriter, r *http.Request) {
 		res := <-c
 		if res.err != nil {
 			json.NewEncoder(w).Encode(res.err)
-			return
-		}
-		for _, video := range res.videos {
-			videos = append(videos, video)
+		} else {
+			for _, video := range res.videos {
+				videos = append(videos, video)
+			}
 		}
 	}
 
