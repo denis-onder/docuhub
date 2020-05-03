@@ -8,8 +8,10 @@ let videos = [];
 
 const url = (endpoint) => BASE_URL + endpoint;
 
-function renderVideos(video) {
-  grid.innerHTML += `
+const renderVideos = (video) => (grid.innerHTML += generateMarkup(video));
+
+function generateMarkup(video) {
+  return `
       <div class="video shadow">
         <a href="${video.URL}" class="video_link"
         ><img
@@ -52,6 +54,7 @@ async function getDocumentaries() {
   clearAndRenderVideos(videos);
 }
 
+// Event handlers
 searchInput.onkeydown = handleSearch;
 searchBtn.onclick = handleSearch;
 window.onload = getDocumentaries;
