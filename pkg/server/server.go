@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/denis-onder/docuhub/app/pkg/handlers"
+	"github.com/denis-onder/docuhub/pkg/handlers"
 	"github.com/gorilla/mux"
 )
 

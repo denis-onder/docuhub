@@ -4,7 +4,7 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/denis-onder/docuhub/app/pkg/server"
+	"github.com/denis-onder/docuhub/pkg/server"
 )
 
 func main() {
