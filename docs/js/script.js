@@ -1,4 +1,4 @@
-const BASE_URL = `http://localhost:8000`,
+const BASE_URL = "https://desolate-fortress-36652.herokuapp.com",
   grid = document.getElementById("grid"),
   counter = document.getElementById("counter"),
   searchInput = document.getElementById("search"),
