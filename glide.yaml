@@ -1,0 +1,6 @@
+package: github.com/denis-onder/docuhub
+import:
+- package: github.com/PuerkitoBio/goquery
+  version: ~1.5.1
+- package: github.com/gorilla/mux
+  version: ~1.7.4
