@@ -1,4 +1,4 @@
-const BASE_URL = "http://localhost:8000",
+const BASE_URL = `http://localhost:${process ? process.env.PORT : 8000}`,
   grid = document.getElementById("grid"),
   counter = document.getElementById("counter"),
   searchInput = document.getElementById("search"),
