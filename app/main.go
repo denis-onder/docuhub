@@ -11,7 +11,7 @@ func main() {
 	var port int
 	p, exists := os.LookupEnv("PORT")
 	if !exists {
-		port = 9000
+		port = 8000
 	} else {
 		parsed, _ := strconv.Atoi(p)
 		port = parsed

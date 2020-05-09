@@ -1,4 +1,4 @@
-const BASE_URL = "http://localhost:9000",
+const BASE_URL = "http://localhost:8000",
   grid = document.getElementById("grid"),
   counter = document.getElementById("counter"),
   searchInput = document.getElementById("search"),
@@ -9,6 +9,20 @@ let videos = [];
 const url = (endpoint) => BASE_URL + endpoint;
 
 const renderVideos = (video) => (grid.innerHTML += generateMarkup(video));
+
+function debounce(cb, timer, immediate = false) {
+  let timeout;
+  return function () {
+    const later = () => {
+      timeout = null;
+      if (!immediate) cb.apply(this, arguments);
+    };
+    const callNow = immediate && !timeout;
+    clearTimeout(timeout);
+    timeout = setTimeout(later, timer);
+    if (callNow) cb.apply(this, arguments);
+  };
+}
 
 function generateMarkup(video) {
   return `
@@ -33,7 +47,7 @@ function clearAndRenderVideos(vids) {
 
   grid.innerHTML = "";
 
-  vids.forEach(renderVideos);
+  vids.forEach((v) => debounce(() => renderVideos(v), 100)());
 }
 
 function handleSearch({ target, keyCode }) {
